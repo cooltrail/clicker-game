@@ -17,10 +17,6 @@
     <hr/>
     <h3>⬆️ Cursor Upgrades</h3>
     <div id="upgrades-list"></div>
-    <hr/>
-    <button id="rebirth-btn" class="rebirth-btn" style="display:none">
-      🌀 Rebirth<br/><small id="rebirth-bonus"></small>
-    </button>
   </aside>
 
   <!-- CENTER: The Bunny -->
@@ -38,6 +34,14 @@
     <h2>🏗️ Buildings</h2>
     <p class="sidebar-note">Earn carrots automatically</p>
     <div id="buildings-list"></div>
+    <div id="rebirth-section" style="display:none; margin-top:16px;">
+      <hr/>
+      <button id="rebirth-btn" class="rebirth-btn">
+        🌀 Rebirth<br/>
+        <small>Reset everything, gain x<span id="rebirth-next-mult">2</span> multiplier forever</small>
+      </button>
+      <p id="rebirth-count" style="text-align:center; color:#da70d6; font-size:0.8rem; margin-top:6px;"></p>
+    </div>
   </aside>
 
   <script src="game.js"></script>
