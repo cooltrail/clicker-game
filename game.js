@@ -6,10 +6,10 @@
 const state = {
   carrots: 0,
   totalEarned: 0,
-  cpc: 1,           // carrots per click
-  cps: 0,           // carrots per second
+  cpc: 1,
+  cps: 0,
   rebirths: 0,
-  rebirthMultiplier: 1,
+  multiplier: 1,
 };
 
 // ── Cursor Upgrades (boost CPC) ─────────────────────
@@ -19,19 +19,21 @@ const UPGRADES = [
   { id: 'gold',     name: '✨ Gold Cursor',     cost: 3500,   cpcBoost: 25,  desc: '+25 carrots/click' },
   { id: 'diamond',  name: '💎 Diamond Cursor',  cost: 50000,  cpcBoost: 100, desc: '+100 carrots/click' },
 ];
-const upgradeBought = {}; // { id: true }
+const upgradeCount = {}; // { id: number of times bought }
+UPGRADES.forEach(u => upgradeCount[u.id] = 0);
 
 // ── Buildings (auto CPS) ────────────────────────────
 const BUILDINGS = [
-  { id: 'auto_clicker', name: '🤖 Auto Clicker',   baseCost: 25,      cps: 0.2  },
-  { id: 'auto_mine',    name: '⛏️ Auto Mine',       baseCost: 100,     cps: 1    },
-  { id: 'factory',      name: '🏭 Auto Factory',    baseCost: 500,     cps: 7    },
-  { id: 'lab',          name: '🔬 Carrot Lab',      baseCost: 2500,    cps: 45   },
-  { id: 'temple',       name: '⛩️ Carrot Temple',   baseCost: 10000,   cps: 260  },
-  { id: 'rocket',       name: '🚀 Carrot Rocket',   baseCost: 50000,   cps: 1400 },
-  { id: 'timemachine',  name: '⏱️ Time Machine',    baseCost: 250000,  cps: 8000 },
-  { id: 'carrotman',    name: '🥕 Carrot Man',      baseCost: 1000000, cps: 47000 },
-  { id: 'carrotgod',    name: '🌌 Carrot God',      baseCost: 5000000, cps: 260000 },
+  { id: 'auto_clicker',  name: '🤖 Auto Clicker',   baseCost: 25,      cps: 0.5   },
+  { id: 'auto_mine',     name: '⛏️ Carrot Mine',       baseCost: 100,     cps: 2     },
+  { id: 'auto_carrot',   name: '🥕 Auto Carrot',     baseCost: 250,     cps: 10    },
+  { id: 'factory',       name: '🏭 Auto Factory',    baseCost: 500,     cps: 14    },
+  { id: 'lab',           name: '🔬 Carrot Lab',      baseCost: 2500,    cps: 90    },
+  { id: 'temple',        name: '⛩️ Carrot Temple',   baseCost: 10000,   cps: 520   },
+  { id: 'rocket',        name: '🚀 Carrot Rocket',   baseCost: 50000,   cps: 2800  },
+  { id: 'timemachine',   name: '⏱️ Time Machine',    baseCost: 250000,  cps: 16000 },
+  { id: 'carrotman',     name: '🥕 Carrot Man',      baseCost: 1000000, cps: 94000 },
+  { id: 'carrotgod',     name: '🌌 Carrot God',      baseCost: 5000000, cps: 520000 },
 ];
 const buildingOwned = {}; // { id: count }
 BUILDINGS.forEach(b => buildingOwned[b.id] = 0);
@@ -44,8 +46,6 @@ const cpcDisplayEl   = document.getElementById('cpc-display');
 const upgradesListEl = document.getElementById('upgrades-list');
 const buildingsListEl= document.getElementById('buildings-list');
 const floatiesEl     = document.getElementById('floaties');
-const rebirthBtn     = document.getElementById('rebirth-btn');
-const rebirthBonusEl = document.getElementById('rebirth-bonus');
 
 // ── Helpers ──────────────────────────────────────────
 function fmt(n) {
@@ -55,10 +55,14 @@ function fmt(n) {
   return Math.floor(n).toLocaleString();
 }
 
-// Buildings get 15% more expensive per purchase
+// Buildings always cost the same
 function buildingCost(building) {
-  const owned = buildingOwned[building.id];
-  return Math.ceil(building.baseCost * Math.pow(1.15, owned));
+  return building.baseCost;
+}
+
+// Upgrades always cost the same
+function upgradeCost(upgrade) {
+  return upgrade.cost;
 }
 
 // Recalculate total CPS from all buildings
@@ -70,13 +74,13 @@ function recalcCPS() {
   state.cps = total;
 }
 
-// Recalculate CPC from upgrades + rebirth
+// Recalculate CPC from upgrades
 function recalcCPC() {
   let base = 1;
   UPGRADES.forEach(u => {
-    if (upgradeBought[u.id]) base += u.cpcBoost;
+    base += u.cpcBoost * upgradeCount[u.id];
   });
-  state.cpc = base * state.rebirthMultiplier;
+  state.cpc = base * state.multiplier;
 }
 
 // ── Click the Bunny ──────────────────────────────────
@@ -115,44 +119,53 @@ function buyBuilding(id) {
 // ── Buy Upgrade ─────────────────────────────────────
 function buyUpgrade(id) {
   const u = UPGRADES.find(x => x.id === id);
-  if (upgradeBought[id] || state.carrots < u.cost) return;
-  state.carrots -= u.cost;
-  upgradeBought[id] = true;
+  const cost = upgradeCost(u);
+  if (state.carrots < cost) return;
+  state.carrots -= cost;
+  upgradeCount[id]++;
   recalcCPC();
   renderUpgrades();
   updateUI();
 }
 
+// ── Rebirth removed ──────────────────────────────────
+
 // ── Rebirth ──────────────────────────────────────────
+const rebirthSection = document.getElementById('rebirth-section');
+const rebirthBtn     = document.getElementById('rebirth-btn');
+const rebirthNextMult= document.getElementById('rebirth-next-mult');
+const rebirthCountEl = document.getElementById('rebirth-count');
+
 rebirthBtn.addEventListener('click', () => {
-  if (state.totalEarned < 100000) return;
+  if (state.carrots < 1_000_000_000_000) return;
   state.rebirths++;
-  state.rebirthMultiplier = 1 + state.rebirths * 0.5; // +50% CPC per rebirth
-  // Reset
+  state.multiplier = 1 + state.rebirths; // x2, x3, x4...
   state.carrots = 0;
   state.totalEarned = 0;
   BUILDINGS.forEach(b => buildingOwned[b.id] = 0);
-  Object.keys(upgradeBought).forEach(k => delete upgradeBought[k]);
+  UPGRADES.forEach(u => upgradeCount[u.id] = 0);
   recalcCPS();
   recalcCPC();
   renderAll();
   updateUI();
-  alert(`🌀 Reborn! You now earn x${state.rebirthMultiplier} carrots per click forever!`);
+  alert(`🌀 Reborn! All carrots now x${state.multiplier} multiplier!`);
 });
 
 // ── Render ───────────────────────────────────────────
 function renderUpgrades() {
   upgradesListEl.innerHTML = '';
   UPGRADES.forEach(u => {
+    const count = upgradeCount[u.id];
+    const cost = upgradeCost(u);
     const btn = document.createElement('button');
-    btn.className = 'upgrade-btn' + (upgradeBought[u.id] ? ' bought' : '');
-    btn.disabled = upgradeBought[u.id] || state.carrots < u.cost;
+    btn.className = 'upgrade-btn';
+    btn.disabled = state.carrots < cost;
     btn.innerHTML = `
-      <span class="btn-name">${u.name}</span>
-      <span class="btn-cost">${upgradeBought[u.id] ? '✅ Bought' : '🥕 ' + fmt(u.cost)}</span>
-      <span class="btn-desc">${u.desc}</span>
+      <span class="btn-name">${u.name} ${count > 0 ? `<span style="color:#ffd700">[${count}]</span>` : ''}</span>
+      <span class="btn-cost">🥕 ${fmt(cost)}</span>
+      <span class="btn-desc">${u.desc} each</span>
     `;
-    if (!upgradeBought[u.id]) btn.onclick = () => buyUpgrade(u.id);
+    btn.onclick = () => buyUpgrade(u.id);
     upgradesListEl.appendChild(btn);
   });
 }
@@ -183,30 +196,31 @@ function renderAll() {
 
 function updateUI() {
   carrotCountEl.textContent = fmt(state.carrots) + ' 🥕';
-  cpsDisplayEl.textContent  = fmt(state.cps) + ' carrots/sec';
+  cpsDisplayEl.textContent  = fmt(state.cps * state.multiplier) + ' carrots/sec';
   cpcDisplayEl.textContent  = fmt(state.cpc) + ' carrot/click';
 
-  // Show rebirth button once player has earned enough
-  if (state.totalEarned >= 100000) {
-    rebirthBtn.style.display = 'block';
-    rebirthBonusEl.textContent =
-      `Rebirth ${state.rebirths + 1} → x${1 + (state.rebirths + 1) * 0.5} CPC forever`;
+  // Show rebirth button when player hits 1 trillion
+  if (state.carrots >= 1_000_000_000_000) {
+    rebirthSection.style.display = 'block';
+  }
+  rebirthNextMult.textContent = state.multiplier + 1;
+  if (state.rebirths > 0) {
+    rebirthCountEl.textContent = `Rebirths: ${state.rebirths} (current x${state.multiplier})`;
   }
 
-  // Refresh button disabled states
   document.querySelectorAll('.building-btn').forEach((btn, i) => {
     const b = BUILDINGS[i];
     btn.disabled = state.carrots < buildingCost(b);
   });
-  document.querySelectorAll('.upgrade-btn:not(.bought)').forEach((btn, i) => {
-    const unbought = UPGRADES.filter(u => !upgradeBought[u.id]);
-    if (unbought[i]) btn.disabled = state.carrots < unbought[i].cost;
+  document.querySelectorAll('.upgrade-btn').forEach((btn, i) => {
+    const u = UPGRADES[i];
+    if (u) btn.disabled = state.carrots < upgradeCost(u);
   });
 }
 
 // ── Game Loop (20 ticks/sec) ─────────────────────────
 setInterval(() => {
-  const gained = (state.cps / 20) * state.rebirthMultiplier;
+  const gained = (state.cps / 20) * state.multiplier;
   state.carrots     += gained;
   state.totalEarned += gained;
   updateUI();
@@ -218,8 +232,8 @@ function saveGame() {
     carrots: state.carrots,
     totalEarned: state.totalEarned,
     rebirths: state.rebirths,
-    rebirthMultiplier: state.rebirthMultiplier,
-    upgradeBought: { ...upgradeBought },
+    multiplier: state.multiplier,
+    upgradeCount: { ...upgradeCount },
     buildingOwned: { ...buildingOwned },
   };
   localStorage.setItem('bunnyClicker', JSON.stringify(data));
@@ -230,11 +244,11 @@ function loadGame() {
   if (!raw) return;
   try {
     const data = JSON.parse(raw);
-    state.carrots           = data.carrots || 0;
-    state.totalEarned       = data.totalEarned || 0;
-    state.rebirths          = data.rebirths || 0;
-    state.rebirthMultiplier = data.rebirthMultiplier || 1;
-    Object.assign(upgradeBought, data.upgradeBought || {});
+    state.carrots     = data.carrots || 0;
+    state.totalEarned = data.totalEarned || 0;
+    state.rebirths    = data.rebirths || 0;
+    state.multiplier  = data.multiplier || 1;
+    Object.assign(upgradeCount, data.upgradeCount || {});
     Object.assign(buildingOwned, data.buildingOwned || {});
     recalcCPS();
     recalcCPC();
