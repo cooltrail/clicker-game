@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bunny Clicker 🐰</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- LEFT SIDEBAR: Stats -->
+  <aside class="sidebar-left">
+    <h1>🥕 Bunny Clicker</h1>
+    <div id="carrot-count" class="big-count">0 carrots</div>
+    <div id="cps-display" class="stat">0 carrots/sec</div>
+    <div id="cpc-display" class="stat">1 carrot/click</div>
+    <hr/>
+    <h3>⬆️ Cursor Upgrades</h3>
+    <div id="upgrades-list"></div>
+    <hr/>
+    <button id="rebirth-btn" class="rebirth-btn" style="display:none">
+      🌀 Rebirth<br/><small id="rebirth-bonus"></small>
+    </button>
+  </aside>
+
+  <!-- CENTER: The Bunny -->
+  <main class="center">
+    <div class="bunny-wrap">
+      <div id="bunny" class="bunny" title="Click me!">🐰</div>
+      <div class="click-hint">click the bunny!</div>
+    </div>
+    <!-- floating +1 labels appear here -->
+    <div id="floaties"></div>
+  </main>
+
+  <!-- RIGHT SIDEBAR: Buildings -->
+  <aside class="sidebar-right">
+    <h2>🏗️ Buildings</h2>
+    <p class="sidebar-note">Earn carrots automatically</p>
+    <div id="buildings-list"></div>
+  </aside>
+
+  <script src="game.js"></script>
+</body>
+</html>

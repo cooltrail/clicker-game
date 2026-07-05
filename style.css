@@ -1,0 +1,217 @@
+/* ── Reset & Base ─────────────────────────────────── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #1a0a00;
+  color: #f5deb3;
+  font-family: 'Segoe UI', sans-serif;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Left Sidebar ─────────────────────────────────── */
+.sidebar-left {
+  width: 240px;
+  background: #2b1200;
+  border-right: 2px solid #6b3a0a;
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.sidebar-left h1 {
+  font-size: 1.3rem;
+  color: #ffb347;
+  margin-bottom: 4px;
+}
+
+.big-count {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #ffd700;
+}
+
+.stat {
+  font-size: 0.85rem;
+  color: #c8a96e;
+}
+
+.sidebar-left h3 {
+  color: #ffb347;
+  margin-top: 4px;
+  font-size: 0.95rem;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #6b3a0a;
+  margin: 6px 0;
+}
+
+/* ── Upgrade Buttons ──────────────────────────────── */
+.upgrade-btn {
+  width: 100%;
+  margin: 3px 0;
+  padding: 7px 10px;
+  background: #3d1f00;
+  border: 1px solid #8b5e0a;
+  border-radius: 8px;
+  color: #f5deb3;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.8rem;
+  transition: background 0.15s;
+}
+
+.upgrade-btn:hover:not(:disabled) {
+  background: #5a2e00;
+}
+
+.upgrade-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.upgrade-btn.bought {
+  background: #1a3d00;
+  border-color: #4a8a00;
+  color: #a0d060;
+  cursor: default;
+}
+
+.upgrade-btn .btn-name { font-weight: bold; display: block; }
+.upgrade-btn .btn-cost { color: #ffd700; }
+.upgrade-btn .btn-desc { color: #a08060; font-size: 0.75rem; }
+
+/* ── Center ───────────────────────────────────────── */
+.center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: radial-gradient(ellipse at center, #2e1500 0%, #1a0a00 80%);
+}
+
+.bunny-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.bunny {
+  font-size: 10rem;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.07s;
+  filter: drop-shadow(0 0 30px #ff8c0088);
+}
+
+.bunny:active {
+  transform: scale(0.88);
+}
+
+.click-hint {
+  color: #8b6040;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+/* ── Floating +1 labels ───────────────────────────── */
+#floaties { position: absolute; inset: 0; pointer-events: none; }
+
+.floatie {
+  position: absolute;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #ffd700;
+  animation: floatUp 0.9s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes floatUp {
+  0%   { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-80px); }
+}
+
+/* ── Right Sidebar ────────────────────────────────── */
+.sidebar-right {
+  width: 260px;
+  background: #2b1200;
+  border-left: 2px solid #6b3a0a;
+  padding: 20px 14px;
+  overflow-y: auto;
+}
+
+.sidebar-right h2 {
+  color: #ffb347;
+  margin-bottom: 4px;
+}
+
+.sidebar-note {
+  font-size: 0.78rem;
+  color: #8b6040;
+  margin-bottom: 10px;
+}
+
+/* ── Building Buttons ─────────────────────────────── */
+.building-btn {
+  width: 100%;
+  margin: 4px 0;
+  padding: 9px 12px;
+  background: #3d1f00;
+  border: 1px solid #8b5e0a;
+  border-radius: 8px;
+  color: #f5deb3;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.82rem;
+  transition: background 0.15s;
+  position: relative;
+}
+
+.building-btn:hover:not(:disabled) {
+  background: #5a2e00;
+}
+
+.building-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.building-btn .btn-name { font-weight: bold; display: block; }
+.building-btn .btn-cost { color: #ffd700; }
+.building-btn .btn-cps  { color: #90ee90; font-size: 0.75rem; }
+.building-btn .btn-owned {
+  position: absolute;
+  right: 10px; top: 50%;
+  transform: translateY(-50%);
+  background: #ff8c00;
+  color: #1a0a00;
+  border-radius: 50%;
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: bold;
+  font-size: 0.78rem;
+}
+
+/* ── Rebirth Button ───────────────────────────────── */
+.rebirth-btn {
+  margin-top: auto;
+  padding: 12px;
+  background: linear-gradient(135deg, #4b0082, #8b008b);
+  border: 2px solid #da70d6;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  text-align: center;
+  transition: transform 0.1s;
+}
+
+.rebirth-btn:hover { transform: scale(1.04); }
